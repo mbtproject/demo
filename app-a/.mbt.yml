@@ -1,0 +1,11 @@
+name: app-a
+dependencies:
+build:
+  darwin:
+    cmd: ../scripts/build_container.sh
+  linux:
+    cmd: ../scripts/build_container.sh
+properties:
+  url: apps/app-a
+  expose: 80
+  replicas: 10

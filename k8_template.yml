@@ -1,0 +1,47 @@
+{{ range $mod := .Modules }}
+apiVersion: extensions/v1beta1 
+kind: Deployment
+metadata:
+  name: {{ $mod.Name }}
+spec:
+{{ $replicas := index $mod.Properties "replicas" }}
+  replicas: {{ if $replicas }}{{ $replicas }}{{ else }}1{{ end }}
+  template:
+    metadata:
+      labels:
+        app: {{ $mod.Name }}
+    spec:
+      containers:
+      - name: nanosvc
+        image: {{ index $.Env "DOCKER_REGISTRY"}}/{{ $mod.Name }}:{{ $mod.Version }}
+        ports:
+        - containerPort: {{ index .Properties "expose" }}
+        args:
+        - name="{{ $mod.Name }}"
+---
+apiVersion: v1
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ $mod.Name }}
+spec:
+  selector:
+    app: {{ $mod.Name }}
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: {{ index .Properties "expose" }}
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $mod.Name }}
+spec:
+  rules:
+  - http:
+      paths:
+      - path: {{ index $mod.Properties "url" }}
+        backend:
+          serviceName: {{ $mod.Name }}
+          servicePort: 80
+{{ end }} 

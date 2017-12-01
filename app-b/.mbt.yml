@@ -1,0 +1,11 @@
+name: app-b
+dependencies:
+  - app-a
+build:
+  darwin:
+    cmd: ../scripts/build_container.sh
+  linux:
+    cmd: ../scripts/build_container.sh
+properties:
+  url: apps/app-b
+  expose: 80
