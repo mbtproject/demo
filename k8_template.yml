@@ -4,8 +4,7 @@ kind: Deployment
 metadata:
   name: {{ $mod.Name }}
 spec:
-{{ $replicas := index $mod.Properties "replicas" }}
-  replicas: {{ if $replicas }}{{ $replicas }}{{ else }}1{{ end }}
+  replicas: {{ propertyOr $mod "replicas" 1}}
   template:
     metadata:
       labels:
@@ -15,7 +14,7 @@ spec:
       - name: nanosvc
         image: {{ index $.Env "DOCKER_REGISTRY"}}/{{ $mod.Name }}:{{ $mod.Version }}
         ports:
-        - containerPort: {{ index .Properties "expose" }}
+        - containerPort: {{ property $mod "expose" }}
         args:
         - name="{{ $mod.Name }}"
 ---
@@ -30,7 +29,7 @@ spec:
   ports:
     - protocol: TCP
       port: 80
-      targetPort: {{ index .Properties "expose" }}
+      targetPort: {{ property $mod "expose" }}
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -40,7 +39,7 @@ spec:
   rules:
   - http:
       paths:
-      - path: {{ index $mod.Properties "url" }}
+      - path: {{ property $mod "url" }}
         backend:
           serviceName: {{ $mod.Name }}
           servicePort: 80
